@@ -1,0 +1,5 @@
+saker.standard-api
+	classpath: [0)
+saker.sdk.support-impl
+	classpath: [this]
+		compile-transitive: false
