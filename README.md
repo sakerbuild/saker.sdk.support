@@ -1,5 +1,7 @@
 # saker.sdk.support
 
+![Build status](https://img.shields.io/azure-devops/build/sakerbuild/e1e9e92f-5211-4858-bff0-3e669809e2e0/3/master)
+
 Contains build tasks and support classes for working with various SDKs and their configurations with the [saker.build system](https://saker.build).
 
 See the [documentation](https://saker.build/saker.sdk.support/doc/) for more information.
