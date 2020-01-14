@@ -1,6 +1,6 @@
 # saker.sdk.support
 
-![Build status](https://img.shields.io/azure-devops/build/sakerbuild/e1e9e92f-5211-4858-bff0-3e669809e2e0/3/master)
+![Build status](https://img.shields.io/azure-devops/build/sakerbuild/e1e9e92f-5211-4858-bff0-3e669809e2e0/3/master) [![Latest version](https://mirror.nest.saker.build/badges/saker.sdk.support/version.svg)](https://nest.saker.build/package/saker.sdk.support "saker.sdk.support | saker.nest")
 
 Contains build tasks and support classes for working with various SDKs and their configurations with the [saker.build system](https://saker.build).
 
