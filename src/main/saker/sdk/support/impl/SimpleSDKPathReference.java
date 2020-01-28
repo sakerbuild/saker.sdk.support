@@ -19,7 +19,6 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.Locale;
 
 import saker.build.file.path.SakerPath;
 import saker.build.file.provider.SakerPathFiles;
@@ -31,7 +30,7 @@ public class SimpleSDKPathReference implements SDKPathReference, Externalizable 
 	private static final long serialVersionUID = 1L;
 
 	private String sdkName;
-	private String directoryIdentifier;
+	private String pathIdentifier;
 	private SakerPath relative;
 
 	/**
@@ -41,8 +40,8 @@ public class SimpleSDKPathReference implements SDKPathReference, Externalizable 
 	}
 
 	public SimpleSDKPathReference(String sdkName, String directoryIdentifier, SakerPath relative) {
-		this.sdkName = sdkName.toLowerCase(Locale.ENGLISH);
-		this.directoryIdentifier = directoryIdentifier;
+		this.sdkName = sdkName;
+		this.pathIdentifier = directoryIdentifier;
 		if (relative != null) {
 			SakerPathFiles.requireRelativePath(relative);
 			this.relative = SakerPath.EMPTY.equals(relative) ? null : relative;
@@ -56,7 +55,7 @@ public class SimpleSDKPathReference implements SDKPathReference, Externalizable 
 
 	@Override
 	public SakerPath getPath(SDKReference sdk) throws Exception {
-		SakerPath result = sdk.getPath(directoryIdentifier);
+		SakerPath result = sdk.getPath(pathIdentifier);
 		if (result != null && relative != null) {
 			return result.resolve(relative);
 		}
@@ -66,14 +65,14 @@ public class SimpleSDKPathReference implements SDKPathReference, Externalizable 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeObject(sdkName);
-		out.writeObject(directoryIdentifier);
+		out.writeObject(pathIdentifier);
 		out.writeObject(relative);
 	}
 
 	@Override
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		sdkName = (String) in.readObject();
-		directoryIdentifier = (String) in.readObject();
+		pathIdentifier = (String) in.readObject();
 		relative = (SakerPath) in.readObject();
 	}
 
@@ -82,7 +81,7 @@ public class SimpleSDKPathReference implements SDKPathReference, Externalizable 
 		final int prime = 31;
 		int result = 1;
 		//do not include the sdk name in the hash code, as it is compared in an ignore case manner
-		result = prime * result + ((directoryIdentifier == null) ? 0 : directoryIdentifier.hashCode());
+		result = prime * result + ((pathIdentifier == null) ? 0 : pathIdentifier.hashCode());
 		result = prime * result + ((relative == null) ? 0 : relative.hashCode());
 		return result;
 	}
@@ -99,10 +98,10 @@ public class SimpleSDKPathReference implements SDKPathReference, Externalizable 
 		if (SDKSupportUtils.getSDKNameComparator().compare(this.sdkName, other.sdkName) != 0) {
 			return false;
 		}
-		if (directoryIdentifier == null) {
-			if (other.directoryIdentifier != null)
+		if (pathIdentifier == null) {
+			if (other.pathIdentifier != null)
 				return false;
-		} else if (!directoryIdentifier.equals(other.directoryIdentifier))
+		} else if (!pathIdentifier.equals(other.pathIdentifier))
 			return false;
 		if (relative == null) {
 			if (other.relative != null)
@@ -114,7 +113,7 @@ public class SimpleSDKPathReference implements SDKPathReference, Externalizable 
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[" + sdkName + ":" + directoryIdentifier
+		return getClass().getSimpleName() + "[" + sdkName + ":" + pathIdentifier
 				+ (relative == null ? "" : " / " + relative) + "]";
 	}
 

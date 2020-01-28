@@ -62,7 +62,7 @@ public interface EnvironmentSDKDescription extends SDKDescription {
 	 * {@link EnvironmentProperty}.
 	 * <p>
 	 * If the property doesn't return and instance of {@link SDKReference}, then a {@link ClassCastException} is thrown
-	 * then it is being retrieved.
+	 * when it is being retrieved.
 	 * 
 	 * @param property
 	 *            The property that is used to retrieve the {@link SDKReference}.

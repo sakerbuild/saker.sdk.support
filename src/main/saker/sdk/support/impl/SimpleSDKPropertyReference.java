@@ -19,10 +19,10 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.Locale;
 
 import saker.sdk.support.api.SDKPropertyReference;
 import saker.sdk.support.api.SDKReference;
+import saker.sdk.support.api.SDKSupportUtils;
 
 public class SimpleSDKPropertyReference implements SDKPropertyReference, Externalizable {
 	private static final long serialVersionUID = 1L;
@@ -37,7 +37,7 @@ public class SimpleSDKPropertyReference implements SDKPropertyReference, Externa
 	}
 
 	public SimpleSDKPropertyReference(String sdkName, String directoryIdentifier) {
-		this.sdkName = sdkName.toLowerCase(Locale.ENGLISH);
+		this.sdkName = sdkName;
 		this.propertyIdentifier = directoryIdentifier;
 	}
 
@@ -67,8 +67,8 @@ public class SimpleSDKPropertyReference implements SDKPropertyReference, Externa
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		//do not include the sdk name in the hash code, as it is compared in an ignore case manner
 		result = prime * result + ((propertyIdentifier == null) ? 0 : propertyIdentifier.hashCode());
-		result = prime * result + ((sdkName == null) ? 0 : sdkName.hashCode());
 		return result;
 	}
 
@@ -81,15 +81,13 @@ public class SimpleSDKPropertyReference implements SDKPropertyReference, Externa
 		if (getClass() != obj.getClass())
 			return false;
 		SimpleSDKPropertyReference other = (SimpleSDKPropertyReference) obj;
+		if (SDKSupportUtils.getSDKNameComparator().compare(this.sdkName, other.sdkName) != 0) {
+			return false;
+		}
 		if (propertyIdentifier == null) {
 			if (other.propertyIdentifier != null)
 				return false;
 		} else if (!propertyIdentifier.equals(other.propertyIdentifier))
-			return false;
-		if (sdkName == null) {
-			if (other.sdkName != null)
-				return false;
-		} else if (!sdkName.equals(other.sdkName))
 			return false;
 		return true;
 	}
