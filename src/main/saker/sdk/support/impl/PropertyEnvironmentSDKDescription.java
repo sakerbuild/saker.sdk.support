@@ -21,11 +21,13 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Objects;
 
+import saker.build.exception.PropertyComputationFailedException;
 import saker.build.runtime.environment.EnvironmentProperty;
 import saker.build.runtime.environment.SakerEnvironment;
 import saker.sdk.support.api.EnvironmentSDKDescription;
 import saker.sdk.support.api.SDKDescriptionVisitor;
 import saker.sdk.support.api.SDKReference;
+import saker.sdk.support.api.exc.SDKNotFoundException;
 
 public class PropertyEnvironmentSDKDescription implements EnvironmentSDKDescription, Externalizable {
 	private static final long serialVersionUID = 1L;
@@ -50,10 +52,15 @@ public class PropertyEnvironmentSDKDescription implements EnvironmentSDKDescript
 
 	@Override
 	public SDKReference getSDK(SakerEnvironment environment) throws Exception {
-		Object result = environment.getEnvironmentPropertyCurrentValue(property);
+		Object result;
+		try {
+			result = environment.getEnvironmentPropertyCurrentValue(property);
+		} catch (PropertyComputationFailedException e) {
+			throw new SDKNotFoundException(e);
+		}
 		if (!(result instanceof SDKReference)) {
-			throw new ClassCastException("SDK environment property result doesn't implement "
-					+ SDKReference.class.getName() + " : " + result);
+			throw new SDKNotFoundException(new ClassCastException("SDK environment property result doesn't implement "
+					+ SDKReference.class.getName() + " : " + result));
 		}
 		return (SDKReference) result;
 	}

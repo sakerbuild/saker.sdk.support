@@ -22,18 +22,23 @@ import java.io.ObjectOutput;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import saker.build.file.path.SakerPath;
 import saker.build.runtime.environment.EnvironmentProperty;
 import saker.build.runtime.environment.SakerEnvironment;
 import saker.build.task.EnvironmentSelectionResult;
+import saker.build.task.TaskContext;
 import saker.build.task.TaskExecutionEnvironmentSelector;
 import saker.build.task.TaskFactory;
 import saker.build.thirdparty.saker.util.ObjectUtils;
+import saker.sdk.support.api.exc.SDKNameConflictException;
+import saker.sdk.support.api.exc.SDKNotFoundException;
+import saker.sdk.support.api.exc.SDKPathNotFoundException;
+import saker.sdk.support.api.exc.SDKPropertyNotFoundException;
 import saker.sdk.support.impl.EnvironmentSDKDescriptionReferenceEnvironmentProperty;
 import saker.sdk.support.impl.SDKBasedClusterExecutionEnvironmentSelector;
 import saker.std.api.environment.qualifier.AnyEnvironmentQualifier;
@@ -98,27 +103,29 @@ public class SDKSupportUtils {
 	 * @throws NullPointerException
 	 *             If the {@link SDKPathReference} is <code>null</code>, or the
 	 *             {@linkplain SDKPathReference#getSDKName() SDK name} that it contains is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             If the SDK with the name, the SDK path wasn't found or querying the SDK path failed with an
-	 *             exception.
+	 * @throws SDKNotFoundException
+	 *             If the SDK for the given name wasn't found.
+	 * @throws SDKPathNotFoundException
+	 *             If the SDK path wasn't found or querying the SDK path failed with an exception.
 	 */
 	public static SakerPath getSDKPathReferencePath(SDKPathReference sdkpathref,
-			Map<String, ? extends SDKReference> sdks) throws NullPointerException, IllegalArgumentException {
+			Map<String, ? extends SDKReference> sdks)
+			throws NullPointerException, SDKNotFoundException, SDKPathNotFoundException {
 		Objects.requireNonNull(sdkpathref, "sdk path reference");
 		String sdkname = sdkpathref.getSDKName();
 		Objects.requireNonNull(sdkname, "sdk name");
 		SDKReference sdkref = ObjectUtils.getMapValue(sdks, sdkname);
 		if (sdkref == null) {
-			throw new IllegalArgumentException("SDK not found for name: " + sdkname);
+			throw new SDKNotFoundException("SDK not found for name: " + sdkname);
 		}
 		try {
 			SakerPath path = sdkpathref.getPath(sdkref);
 			if (path == null) {
-				throw new IllegalArgumentException("No SDK path found for: " + sdkpathref + " in " + sdkref);
+				throw new SDKPathNotFoundException("No SDK path found for: " + sdkpathref + " in " + sdkref);
 			}
 			return path;
 		} catch (Exception e) {
-			throw new IllegalArgumentException("No SDK path found for: " + sdkpathref + " in " + sdkref, e);
+			throw new SDKPathNotFoundException("No SDK path found for: " + sdkpathref + " in " + sdkref, e);
 		}
 	}
 
@@ -140,27 +147,30 @@ public class SDKSupportUtils {
 	 * @throws NullPointerException
 	 *             If the {@link SDKPropertyReference} is <code>null</code>, or the
 	 *             {@linkplain SDKPropertyReference#getSDKName() SDK name} that it contains is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             If the SDK with the name, the SDK property wasn't found or querying the SDK property failed with an
-	 *             exception.
+	 * @throws SDKNotFoundException
+	 *             If the SDK for the given name wasn't found.
+	 * @throws SDKPropertyNotFoundException
+	 *             If the SDK property wasn't found or querying the SDK property failed with an exception.
 	 */
 	public static String getSDKPropertyReferenceProperty(SDKPropertyReference sdkpropertyref,
-			Map<String, ? extends SDKReference> sdks) throws NullPointerException, IllegalArgumentException {
+			Map<String, ? extends SDKReference> sdks)
+			throws NullPointerException, SDKNotFoundException, SDKPropertyNotFoundException {
 		Objects.requireNonNull(sdkpropertyref, "sdk property reference");
 		String sdkname = sdkpropertyref.getSDKName();
 		Objects.requireNonNull(sdkname, "sdk name");
 		SDKReference sdkref = ObjectUtils.getMapValue(sdks, sdkname);
 		if (sdkref == null) {
-			throw new IllegalArgumentException("SDK not found for name: " + sdkname);
+			throw new SDKNotFoundException("SDK not found for name: " + sdkname);
 		}
 		try {
 			String property = sdkpropertyref.getProperty(sdkref);
 			if (property == null) {
-				throw new IllegalArgumentException("No SDK property found for: " + sdkpropertyref + " in " + sdkref);
+				throw new SDKPropertyNotFoundException(
+						"No SDK property found for: " + sdkpropertyref + " in " + sdkref);
 			}
 			return property;
 		} catch (Exception e) {
-			throw new IllegalArgumentException("No SDK property found for: " + sdkpropertyref + " in " + sdkref, e);
+			throw new SDKPropertyNotFoundException("No SDK property found for: " + sdkpropertyref + " in " + sdkref, e);
 		}
 	}
 
@@ -296,6 +306,167 @@ public class SDKSupportUtils {
 		return ndescriptions;
 	}
 
+	/**
+	 * Resolves the SDK references for the specified SDK descriptions.
+	 * <p>
+	 * The method will examine the specified {@link SDKDescription}s and create the matching {@link SDKReference}
+	 * instances for them.
+	 * <p>
+	 * The method will install appropriate dependencies as specified by
+	 * {@link #resolveSDKReference(TaskContext, SDKDescription)}.
+	 * 
+	 * @param taskcontext
+	 *            The task context.
+	 * @param sdkdescriptions
+	 *            The SDK descriptions.
+	 * @return The resolved SDK references.
+	 * @throws NullPointerException
+	 *             If any of the arguments are <code>null</code>.
+	 * @throws SDKNameConflictException
+	 *             If there are more than one SDKs in the argument map for the same name defined by
+	 *             {@link #getSDKNameComparator()}.
+	 * @throws SDKNotFoundException
+	 *             If an SDK cannot be resolved in the current build environment.
+	 * @since saker.sdk.support 0.8.2
+	 * @see #resolveSDKReference(TaskContext, SDKDescription)
+	 */
+	public static NavigableMap<String, SDKReference> resolveSDKReferences(TaskContext taskcontext,
+			NavigableMap<String, ? extends SDKDescription> sdkdescriptions)
+			throws NullPointerException, SDKNameConflictException, SDKNotFoundException {
+		Objects.requireNonNull(taskcontext, "task context");
+		Objects.requireNonNull(sdkdescriptions, "sdk descriptions");
+
+		NavigableMap<String, SDKReference> sdkreferences = new TreeMap<>(getSDKNameComparator());
+		for (Entry<String, ? extends SDKDescription> entry : sdkdescriptions.entrySet()) {
+			SDKReference sdk = resolveSDKReference(taskcontext, entry.getValue());
+			String sdkname = entry.getKey();
+			SDKReference prev = sdkreferences.put(sdkname, sdk);
+			if (prev != null) {
+				throw new SDKNameConflictException(
+						"Duplicate SDKs with name: " + sdkname + " as " + prev + " and " + sdk);
+			}
+		}
+		return sdkreferences;
+	}
+
+	/**
+	 * Resolves the SDK references for the specified SDK descriptions.
+	 * <p>
+	 * The method will examine the specified {@link SDKDescription}s and create the matching {@link SDKReference}
+	 * instances for them.
+	 * <p>
+	 * This method works similarly to {@link #resolveSDKReferences(TaskContext, NavigableMap)}, but doesn't report
+	 * dependencies.
+	 * 
+	 * @param taskcontext
+	 *            The task context.
+	 * @param sdkdescriptions
+	 *            The SDK descriptions.
+	 * @return The resolved SDK references.
+	 * @throws NullPointerException
+	 *             If any of the arguments are <code>null</code>.
+	 * @throws SDKNameConflictException
+	 *             If there are more than one SDKs in the argument map for the same name defined by
+	 *             {@link #getSDKNameComparator()}.
+	 * @throws SDKNotFoundException
+	 *             If an SDK cannot be resolved in the current build environment.
+	 * @since saker.sdk.support 0.8.2
+	 * @see #resolveSDKReferences(SakerEnvironment, NavigableMap)
+	 */
+	public static NavigableMap<String, SDKReference> resolveSDKReferences(SakerEnvironment environment,
+			NavigableMap<String, ? extends SDKDescription> sdkdescriptions)
+			throws NullPointerException, SDKNameConflictException, SDKNotFoundException {
+		Objects.requireNonNull(environment, "environment");
+		Objects.requireNonNull(sdkdescriptions, "sdk descriptions");
+
+		NavigableMap<String, SDKReference> sdkreferences = new TreeMap<>(getSDKNameComparator());
+		for (Entry<String, ? extends SDKDescription> entry : sdkdescriptions.entrySet()) {
+			SDKReference sdk = resolveSDKReference(environment, entry.getValue());
+			String sdkname = entry.getKey();
+			SDKReference prev = sdkreferences.put(sdkname, sdk);
+			if (prev != null) {
+				throw new SDKNameConflictException(
+						"Duplicate SDKs with name: " + sdkname + " as " + prev + " and " + sdk);
+			}
+		}
+		return sdkreferences;
+	}
+
+	/**
+	 * Resolves an SDK reference from the given SDK description.
+	 * <p>
+	 * The method will examine the specified {@link SDKDescription} and create the matching {@link SDKReference}
+	 * instance for it.
+	 * <p>
+	 * The method will install appropriate dependencies using the specified {@link TaskContext}. These dependencies are
+	 * {@linkplain TaskContext#reportEnvironmentDependency(EnvironmentProperty, Object) environment property
+	 * dependencies} that are associated with the SDK resolution.
+	 * 
+	 * @param taskcontext
+	 *            The task context.
+	 * @param sdkdescription
+	 *            The SDK description to resolve.
+	 * @return The resolved SDK reference.
+	 * @throws NullPointerException
+	 *             If any of the arguments are <code>null</code>.
+	 * @throws SDKNotFoundException
+	 *             If the SDK cannot be resolved in the current build environment.
+	 * @since saker.sdk.support 0.8.2
+	 * @see #resolveSDKReferences(TaskContext, NavigableMap)
+	 * @see UserSDKDescription#getQualifier()
+	 * @see PropertyEnvironmentQualifier#getEnvironmentProperty()
+	 * @see #getEnvironmentSDKDescriptionReferenceEnvironmentProperty(EnvironmentSDKDescription)
+	 */
+	public static SDKReference resolveSDKReference(TaskContext taskcontext, SDKDescription sdkdescription)
+			throws NullPointerException, SDKNotFoundException {
+		Objects.requireNonNull(taskcontext, "task context");
+		Objects.requireNonNull(sdkdescription, "sdk description");
+
+		AbstractSDKReferenceResolverDescriptionVisitor resolver = new AbstractSDKReferenceResolverDescriptionVisitor() {
+			@Override
+			protected <T> T getEnvironmentPropertyValue(EnvironmentProperty<T> property) {
+				return taskcontext.getTaskUtilities().getReportEnvironmentDependency(property);
+			}
+		};
+		sdkdescription.accept(resolver);
+		return resolver.result;
+	}
+
+	/**
+	 * Resolves an SDK reference from the given SDK description.
+	 * <p>
+	 * The method will examine the specified {@link SDKDescription} and create the matching {@link SDKReference}
+	 * instance for it.
+	 * <p>
+	 * This method works similarly to {@link #resolveSDKReference(TaskContext, SDKDescription)}, but doesn't report
+	 * dependencies.
+	 * 
+	 * @param taskcontext
+	 *            The task context.
+	 * @param sdkdescription
+	 *            The SDK description to resolve.
+	 * @return The resolved SDK reference.
+	 * @throws NullPointerException
+	 *             If any of the arguments are <code>null</code>.
+	 * @throws SDKNotFoundException
+	 *             If the SDK cannot be resolved in the current build environment.
+	 * @since saker.sdk.support 0.8.2
+	 */
+	public static SDKReference resolveSDKReference(SakerEnvironment environment, SDKDescription sdkdescription)
+			throws NullPointerException, SDKNotFoundException {
+		Objects.requireNonNull(environment, "environment");
+		Objects.requireNonNull(sdkdescription, "sdk description");
+
+		AbstractSDKReferenceResolverDescriptionVisitor resolver = new AbstractSDKReferenceResolverDescriptionVisitor() {
+			@Override
+			protected <T> T getEnvironmentPropertyValue(EnvironmentProperty<T> property) {
+				return environment.getEnvironmentPropertyCurrentValue(property);
+			}
+		};
+		sdkdescription.accept(resolver);
+		return resolver.result;
+	}
+
 	private static SDKReference getResolvedSDKReference(SDKDescription description,
 			EnvironmentSelectionResult selectionresult) {
 		SDKReference[] result = { null };
@@ -307,12 +478,67 @@ public class SDKSupportUtils {
 				SDKReference resolvedsdkref = (SDKReference) selectionresult.getQualifierEnvironmentProperties()
 						.get(envproperty);
 				if (resolvedsdkref == null) {
-					throw new IllegalArgumentException("Failed to resolve environment SDK description: " + description);
+					throw new SDKNotFoundException("Failed to resolve environment SDK description: " + description);
 				}
 				result[0] = resolvedsdkref;
 			}
 		});
 		return result[0];
+	}
+
+	private static abstract class AbstractSDKReferenceResolverDescriptionVisitor implements SDKDescriptionVisitor {
+		protected SDKReference result;
+
+		public AbstractSDKReferenceResolverDescriptionVisitor() {
+		}
+
+		@Override
+		public void visit(ResolvedSDKDescription description) {
+			result = description.getSDKReference();
+		}
+
+		@Override
+		public void visit(EnvironmentSDKDescription description) {
+			EnvironmentProperty<? extends SDKReference> property = SDKSupportUtils
+					.getEnvironmentSDKDescriptionReferenceEnvironmentProperty(description);
+			SDKReference ref = getEnvironmentPropertyValue(property);
+			result = ref;
+		}
+
+		@Override
+		public void visit(IndeterminateSDKDescription description) {
+			SDKDescription basesdk = description.getBaseSDKDescription();
+			Objects.requireNonNull(basesdk, "base sdk description");
+			basesdk.accept(this);
+		}
+
+		@Override
+		public void visit(UserSDKDescription description) {
+			EnvironmentQualifier qualifier = description.getQualifier();
+			if (qualifier != null) {
+				qualifier.accept(new EnvironmentQualifierVisitor() {
+					@Override
+					public void visit(PropertyEnvironmentQualifier qualifier) {
+						EnvironmentProperty<?> property = qualifier.getEnvironmentProperty();
+						Object actual = getEnvironmentPropertyValue(property);
+						Object expected = qualifier.getExpectedValue();
+						if (!Objects.equals(actual, expected)) {
+							throw new SDKNotFoundException("SDK environment qualifier property value mismatch: "
+									+ qualifier + " with actual: " + actual + " and expected: " + expected);
+						}
+					}
+
+					@Override
+					public void visit(AnyEnvironmentQualifier qualifier) {
+						//okay
+					}
+
+				});
+			}
+			result = UserSDKDescription.createSDKReference(description.getPaths(), description.getProperties());
+		}
+
+		protected abstract <T> T getEnvironmentPropertyValue(EnvironmentProperty<T> property);
 	}
 
 	private static final class SDKNameComparator implements Comparator<String>, Externalizable {
