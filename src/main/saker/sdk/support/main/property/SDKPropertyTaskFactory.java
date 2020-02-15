@@ -20,6 +20,7 @@ import saker.build.task.ParameterizableTask;
 import saker.build.task.TaskContext;
 import saker.build.task.utils.annot.SakerInput;
 import saker.build.task.utils.dependencies.EqualityTaskOutputChangeDetector;
+import saker.build.trace.BuildTrace;
 import saker.nest.scriptinfo.reflection.annot.NestInformation;
 import saker.nest.scriptinfo.reflection.annot.NestParameterInformation;
 import saker.nest.scriptinfo.reflection.annot.NestTaskInformation;
@@ -68,6 +69,10 @@ public class SDKPropertyTaskFactory extends FrontendTaskFactory<Object> {
 
 			@Override
 			public Object run(TaskContext taskcontext) throws Exception {
+				if (saker.build.meta.Versions.VERSION_FULL_COMPOUND >= 8_006) {
+					BuildTrace.classifyTask(BuildTrace.CLASSIFICATION_CONFIGURATION);
+				}
+
 				SDKPropertyReference result = SDKPropertyReference.create(sdkName, identifier);
 				taskcontext.reportSelfTaskOutputChangeDetector(new EqualityTaskOutputChangeDetector(result));
 				return result;

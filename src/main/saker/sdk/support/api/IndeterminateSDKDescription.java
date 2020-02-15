@@ -38,8 +38,8 @@ import java.io.Externalizable;
  * This SDK description plays an important role to ensure that the same SDKs are used for a given operation when the SDK
  * installations on build cluster machines are heterogeneous.
  * <p>
- * Clients are recommended implement this interface. When doing so, make sure to adhere to the {@link #hashCode()} and
- * {@link #equals(Object)} contract. Implementers are also recommended to implement {@link Externalizable}.
+ * Clients are recommended to implement this interface. When doing so, make sure to adhere to the {@link #hashCode()}
+ * and {@link #equals(Object)} contract. Implementers are also recommended to implement {@link Externalizable}.
  */
 public interface IndeterminateSDKDescription extends SDKDescription {
 	/**

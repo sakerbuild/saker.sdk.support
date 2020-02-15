@@ -25,6 +25,7 @@ import saker.build.task.utils.annot.SakerInput;
 import saker.build.task.utils.dependencies.EqualityTaskOutputChangeDetector;
 import saker.build.thirdparty.saker.util.ImmutableUtils;
 import saker.build.thirdparty.saker.util.ObjectUtils;
+import saker.build.trace.BuildTrace;
 import saker.nest.scriptinfo.reflection.annot.NestInformation;
 import saker.nest.scriptinfo.reflection.annot.NestParameterInformation;
 import saker.nest.scriptinfo.reflection.annot.NestTaskInformation;
@@ -65,7 +66,7 @@ import saker.std.main.environment.qualifier.EnvironmentQualifierTaskOption;
 				+ "task context."))
 public class UserSDKTaskFactory extends FrontendTaskFactory<SDKDescription> {
 	private static final long serialVersionUID = 1L;
-	
+
 	public static final String TASK_NAME = "sdk.user";
 
 	@Override
@@ -81,6 +82,10 @@ public class UserSDKTaskFactory extends FrontendTaskFactory<SDKDescription> {
 
 			@Override
 			public SDKDescription run(TaskContext taskcontext) throws Exception {
+				if (saker.build.meta.Versions.VERSION_FULL_COMPOUND >= 8_006) {
+					BuildTrace.classifyTask(BuildTrace.CLASSIFICATION_CONFIGURATION);
+				}
+
 				if (!ObjectUtils.hasNonNull(propertiesOption, pathsOption, environmentQualifierOption)) {
 					//everything is null. useless.
 					taskcontext.abortExecution(new IllegalArgumentException("No arguments specified."));

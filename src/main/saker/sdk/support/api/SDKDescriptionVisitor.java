@@ -62,6 +62,9 @@ public interface SDKDescriptionVisitor {
 
 	/**
 	 * Visits an {@linkplain IndeterminateSDKDescription indeterminate SDK description}.
+	 * <p>
+	 * The default implementation visits the {@linkplain IndeterminateSDKDescription#getBaseSDKDescription() base SDK
+	 * description}.
 	 * 
 	 * @param description
 	 *            The SDK description.
