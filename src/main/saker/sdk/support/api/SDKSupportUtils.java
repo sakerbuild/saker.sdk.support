@@ -358,8 +358,8 @@ public class SDKSupportUtils {
 	 * This method works similarly to {@link #resolveSDKReferences(TaskContext, NavigableMap)}, but doesn't report
 	 * dependencies.
 	 * 
-	 * @param taskcontext
-	 *            The task context.
+	 * @param environment
+	 *            The build environment.
 	 * @param sdkdescriptions
 	 *            The SDK descriptions.
 	 * @return The resolved SDK references.
@@ -441,8 +441,8 @@ public class SDKSupportUtils {
 	 * This method works similarly to {@link #resolveSDKReference(TaskContext, SDKDescription)}, but doesn't report
 	 * dependencies.
 	 * 
-	 * @param taskcontext
-	 *            The task context.
+	 * @param environment
+	 *            The build environment.
 	 * @param sdkdescription
 	 *            The SDK description to resolve.
 	 * @return The resolved SDK reference.
