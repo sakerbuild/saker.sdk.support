@@ -15,6 +15,7 @@
  */
 package saker.sdk.support.api;
 
+import java.io.Externalizable;
 import java.util.Map;
 
 import saker.build.file.path.SakerPath;
@@ -31,6 +32,8 @@ import saker.build.file.path.SakerPath;
  * Clients are recommended to implement this interface.
  * <p>
  * Clients should adhere to the contract specified by {@link #hashCode()} and {@link #equals(Object)}.
+ * <p>
+ * Implementations are recommended to implement the {@link Externalizable} interface.
  * <p>
  * <i>Design note:</i> The interface doesn't provide a method to query the supported path and property identifiers. In
  * general, when one wants to use an SDK, the identifiers must be known beforehand, and the need for querying them

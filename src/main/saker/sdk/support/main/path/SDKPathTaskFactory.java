@@ -86,6 +86,7 @@ public class SDKPathTaskFactory extends FrontendTaskFactory<Object> {
 				if (relativePath != null && !relativePath.isRelative()) {
 					taskcontext.abortExecution(
 							new InvalidPathFormatException("Relative path argument is not relative: " + relativePath));
+					return null;
 				}
 				SDKPathReference result = SDKPathReference.create(sdkName, identifier, relativePath);
 				taskcontext.reportSelfTaskOutputChangeDetector(new EqualityTaskOutputChangeDetector(result));

@@ -287,10 +287,13 @@ public class SDKSupportUtils {
 	 * @return The pinned SDK description map.
 	 * @throws NullPointerException
 	 *             If any of the arguments are <code>null</code>.
+	 * @throws SDKNotFoundException
+	 *             If the resolved SDK reference is not found for a given description.
 	 * @since saker.sdk.support 0.8.1
 	 */
 	public static NavigableMap<String, SDKDescription> pinSDKSelection(EnvironmentSelectionResult envselectionresult,
-			NavigableMap<String, ? extends SDKDescription> sdkdescriptions) throws NullPointerException {
+			NavigableMap<String, ? extends SDKDescription> sdkdescriptions)
+			throws NullPointerException, SDKNotFoundException {
 		Objects.requireNonNull(envselectionresult, "environment selection result");
 		Objects.requireNonNull(sdkdescriptions, "sdk descriptions");
 		TreeMap<String, SDKDescription> ndescriptions = new TreeMap<>(sdkdescriptions);
@@ -299,6 +302,45 @@ public class SDKSupportUtils {
 			if (desc instanceof IndeterminateSDKDescription) {
 				IndeterminateSDKDescription indeterminate = (IndeterminateSDKDescription) desc;
 				SDKReference actualreference = getResolvedSDKReference(desc, envselectionresult);
+				SDKDescription pinneddescription = indeterminate.pinSDKDescription(actualreference);
+				entry.setValue(pinneddescription);
+			}
+		}
+		return ndescriptions;
+	}
+
+	/**
+	 * Pins the SDK descriptions of the resolved {@link IndeterminateSDKDescription indeterminate SDK descriptions}.
+	 * <p>
+	 * This method works the same way as {@link #pinSDKSelection(EnvironmentSelectionResult, NavigableMap)}, but
+	 * retrieves the resolved SDK references from the given argument rather than an environment selection result.
+	 * 
+	 * @param sdkdescriptions
+	 *            The SDK descriptions that should be pinned.
+	 * @param sdkreferences
+	 *            The resolved SDK references.
+	 * @return The pinned SDK description map.
+	 * @throws NullPointerException
+	 *             If any of the arguments are <code>null</code>.
+	 * @throws SDKNotFoundException
+	 *             If the resolved SDK reference is not found for a given description.
+	 * @since saker.sdk.support 0.8.3
+	 */
+	public static NavigableMap<String, SDKDescription> pinSDKSelection(
+			NavigableMap<String, ? extends SDKDescription> sdkdescriptions,
+			NavigableMap<String, ? extends SDKReference> sdkreferences)
+			throws NullPointerException, SDKNotFoundException {
+		Objects.requireNonNull(sdkdescriptions, "sdk descriptions");
+		Objects.requireNonNull(sdkreferences, "sdk references");
+		TreeMap<String, SDKDescription> ndescriptions = new TreeMap<>(sdkdescriptions);
+		for (Entry<String, SDKDescription> entry : ndescriptions.entrySet()) {
+			SDKDescription desc = entry.getValue();
+			if (desc instanceof IndeterminateSDKDescription) {
+				IndeterminateSDKDescription indeterminate = (IndeterminateSDKDescription) desc;
+				SDKReference actualreference = sdkreferences.get(entry.getKey());
+				if (actualreference == null) {
+					throw new SDKNotFoundException("Resolved SDK reference not found for name: " + entry.getKey());
+				}
 				SDKDescription pinneddescription = indeterminate.pinSDKDescription(actualreference);
 				entry.setValue(pinneddescription);
 			}
