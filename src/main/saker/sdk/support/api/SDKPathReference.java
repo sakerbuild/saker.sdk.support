@@ -16,30 +16,35 @@
 package saker.sdk.support.api;
 
 import java.io.Externalizable;
+import java.util.Map;
 import java.util.Objects;
 
 import saker.build.exception.InvalidPathFormatException;
 import saker.build.file.path.SakerPath;
+import saker.build.thirdparty.saker.util.ObjectUtils;
+import saker.sdk.support.api.exc.SDKNotFoundException;
 import saker.sdk.support.impl.SimpleSDKPathReference;
 
 /**
- * Interface that encloses a reference to an {@linkplain SDKReference#getPath(String) SDK path}.
+ * Interface that references a {@link String} value derived based on the associated SDKs.
  * <p>
- * Instances of this interface are used to configure tasks with input paths that are resolved from an
- * {@link SDKReference}.
+ * Instances of this interface are used to configure tasks with input paths that are resolved from the
+ * {@link SDKReference SDKReferences} in the caller context.
  * <p>
  * Clients may implement this interface. When doing so, make sure to adhere to the {@link #hashCode()} and
  * {@link #equals(Object)} contract. Implementers are also recommended to implement {@link Externalizable}.
  * <p>
  * Use {@link #create} to create a new instance.
  */
-public interface SDKPathReference {
+public interface SDKPathReference extends SDKValueReference<SakerPath> {
 	/**
 	 * Gets the SDK name for which this path reference is associated with.
 	 * 
+	 * @deprecated Call {@link #getValue(Map)} directly instead. (Since saker.sdk.support 0.8.3)
 	 * @return The SDK name.
 	 * @see SDKSupportUtils#getSDKNameComparator()
 	 */
+	@Deprecated
 	public String getSDKName();
 
 	/**
@@ -52,13 +57,26 @@ public interface SDKPathReference {
 	 * <p>
 	 * If the path cannot be retrieved from the SDK, then the method may return <code>null</code> or throw an exception.
 	 * 
+	 * @deprecated Call {@link #getValue(Map)} directly instead. (Since saker.sdk.support 0.8.3)
 	 * @param sdk
 	 *            The SDK.
 	 * @return The resolved path or <code>null</code> if the resolution failed.
 	 * @throws Exception
 	 *             If the operation failed.
 	 */
+	@Deprecated
 	public SakerPath getPath(SDKReference sdk) throws Exception;
+
+	@Override
+	public default SakerPath getValue(Map<String, ? extends SDKReference> sdks) throws Exception {
+		String sdkname = getSDKName();
+		Objects.requireNonNull(sdkname, "sdk name");
+		SDKReference sdk = ObjectUtils.getMapValue(sdks, sdkname);
+		if (sdk == null) {
+			throw new SDKNotFoundException(sdkname);
+		}
+		return this.getPath(sdk);
+	}
 
 	@Override
 	public int hashCode();

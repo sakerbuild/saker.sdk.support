@@ -23,18 +23,18 @@ import saker.sdk.support.api.SDKReference;
  * @see SDKReference#getPath(String)
  * @since saker.sdk.support 0.8.2
  */
-public class SDKPathNotFoundException extends SDKManagementException {
+public class SDKPathNotFoundException extends SDKValueNotFoundException {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * @see SDKManagementException#SDKManagementException()
+	 * @see SDKValueNotFoundException#SDKInformationNotFoundException()
 	 */
 	public SDKPathNotFoundException() {
 		super();
 	}
 
 	/**
-	 * @see SDKManagementException#SDKManagementException(String, Throwable, boolean, boolean)
+	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String, Throwable, boolean, boolean)
 	 */
 	protected SDKPathNotFoundException(String message, Throwable cause, boolean enableSuppression,
 			boolean writableStackTrace) {
@@ -42,21 +42,21 @@ public class SDKPathNotFoundException extends SDKManagementException {
 	}
 
 	/**
-	 * @see SDKManagementException#SDKManagementException(String, Throwable)
+	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String, Throwable)
 	 */
 	public SDKPathNotFoundException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
-	 * @see SDKManagementException#SDKManagementException(String)
+	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String)
 	 */
 	public SDKPathNotFoundException(String message) {
 		super(message);
 	}
 
 	/**
-	 * @see SDKManagementException#SDKManagementException(Throwable)
+	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(Throwable)
 	 */
 	public SDKPathNotFoundException(Throwable cause) {
 		super(cause);

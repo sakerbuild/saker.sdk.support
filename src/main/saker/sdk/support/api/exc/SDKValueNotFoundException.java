@@ -15,50 +15,49 @@
  */
 package saker.sdk.support.api.exc;
 
-import saker.sdk.support.api.SDKReference;
-
 /**
- * An SDK property was not found for a given name in an SDK.
+ * Failed to derive some information based on the input SDKs. 
  * 
- * @see SDKReference#getProperty(String)
- * @since saker.sdk.support 0.8.2
+ * @see SDKPathNotFoundException
+ * @see SDKPropertyNotFoundException
+ * @since saker.sdk.support 0.8.3
  */
-public class SDKPropertyNotFoundException extends SDKValueNotFoundException {
+public class SDKValueNotFoundException extends SDKManagementException {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException()
+	 * @see SDKManagementException#SDKManagementException()
 	 */
-	public SDKPropertyNotFoundException() {
+	public SDKValueNotFoundException() {
 		super();
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String, Throwable, boolean, boolean)
+	 * @see SDKManagementException#SDKManagementException(String, Throwable, boolean, boolean)
 	 */
-	protected SDKPropertyNotFoundException(String message, Throwable cause, boolean enableSuppression,
+	protected SDKValueNotFoundException(String message, Throwable cause, boolean enableSuppression,
 			boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String, Throwable)
+	 * @see SDKManagementException#SDKManagementException(String, Throwable)
 	 */
-	public SDKPropertyNotFoundException(String message, Throwable cause) {
+	public SDKValueNotFoundException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String)
+	 * @see SDKManagementException#SDKManagementException(String)
 	 */
-	public SDKPropertyNotFoundException(String message) {
+	public SDKValueNotFoundException(String message) {
 		super(message);
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(Throwable)
+	 * @see SDKManagementException#SDKManagementException(Throwable)
 	 */
-	public SDKPropertyNotFoundException(Throwable cause) {
+	public SDKValueNotFoundException(Throwable cause) {
 		super(cause);
 	}
 }

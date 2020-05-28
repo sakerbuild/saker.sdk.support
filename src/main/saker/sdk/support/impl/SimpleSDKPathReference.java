@@ -49,11 +49,13 @@ public class SimpleSDKPathReference implements SDKPathReference, Externalizable 
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public String getSDKName() {
 		return sdkName;
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public SakerPath getPath(SDKReference sdk) throws Exception {
 		SakerPath result = sdk.getPath(pathIdentifier);
 		if (result != null && relative != null) {

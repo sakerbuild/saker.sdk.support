@@ -19,58 +19,56 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.Collection;
+import java.util.Map;
 
+import saker.build.thirdparty.saker.util.ImmutableUtils;
+import saker.build.thirdparty.saker.util.io.SerialUtils;
+import saker.sdk.support.api.SDKPropertyCollectionReference;
 import saker.sdk.support.api.SDKPropertyReference;
 import saker.sdk.support.api.SDKReference;
-import saker.sdk.support.api.SDKSupportUtils;
 
-public class SimpleSDKPropertyReference implements SDKPropertyReference, Externalizable {
+public final class SDKPropertyReferenceBackedCollectionReference
+		implements SDKPropertyCollectionReference, Externalizable {
 	private static final long serialVersionUID = 1L;
 
-	private String sdkName;
-	private String propertyIdentifier;
+	private SDKPropertyReference propertyReference;
 
 	/**
 	 * For {@link Externalizable}.
 	 */
-	public SimpleSDKPropertyReference() {
+	public SDKPropertyReferenceBackedCollectionReference() {
 	}
 
-	public SimpleSDKPropertyReference(String sdkName, String directoryIdentifier) {
-		this.sdkName = sdkName;
-		this.propertyIdentifier = directoryIdentifier;
-	}
-
-	@Override
-	@SuppressWarnings("deprecation")
-	public String getSDKName() {
-		return sdkName;
+	public SDKPropertyReferenceBackedCollectionReference(SDKPropertyReference pathref) {
+		this.propertyReference = pathref;
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public String getProperty(SDKReference sdk) throws Exception {
-		return sdk.getProperty(propertyIdentifier);
+	public Collection<String> getValue(Map<String, ? extends SDKReference> sdks)
+			throws NullPointerException, Exception {
+		String value = propertyReference.getValue(sdks);
+		if (value == null) {
+			return null;
+		}
+		return ImmutableUtils.singletonNavigableSet(value);
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
-		out.writeObject(sdkName);
-		out.writeObject(propertyIdentifier);
+		out.writeObject(propertyReference);
 	}
 
 	@Override
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-		sdkName = (String) in.readObject();
-		propertyIdentifier = (String) in.readObject();
+		propertyReference = SerialUtils.readExternalObject(in);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		//do not include the sdk name in the hash code, as it is compared in an ignore case manner
-		result = prime * result + ((propertyIdentifier == null) ? 0 : propertyIdentifier.hashCode());
+		result = prime * result + ((propertyReference == null) ? 0 : propertyReference.hashCode());
 		return result;
 	}
 
@@ -82,21 +80,18 @@ public class SimpleSDKPropertyReference implements SDKPropertyReference, Externa
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SimpleSDKPropertyReference other = (SimpleSDKPropertyReference) obj;
-		if (SDKSupportUtils.getSDKNameComparator().compare(this.sdkName, other.sdkName) != 0) {
-			return false;
-		}
-		if (propertyIdentifier == null) {
-			if (other.propertyIdentifier != null)
+		SDKPropertyReferenceBackedCollectionReference other = (SDKPropertyReferenceBackedCollectionReference) obj;
+		if (propertyReference == null) {
+			if (other.propertyReference != null)
 				return false;
-		} else if (!propertyIdentifier.equals(other.propertyIdentifier))
+		} else if (!propertyReference.equals(other.propertyReference))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "[" + sdkName + ":" + propertyIdentifier + "]";
+		return getClass().getSimpleName() + "[" + propertyReference + "]";
 	}
 
 }

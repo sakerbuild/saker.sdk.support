@@ -16,28 +16,33 @@
 package saker.sdk.support.api;
 
 import java.io.Externalizable;
+import java.util.Map;
 import java.util.Objects;
 
+import saker.build.thirdparty.saker.util.ObjectUtils;
+import saker.sdk.support.api.exc.SDKNotFoundException;
 import saker.sdk.support.impl.SimpleSDKPropertyReference;
 
 /**
- * Interface that encloses a reference to an {@linkplain SDKReference#getProperty(String) SDK property}.
+ * Interface that references a {@link String} value derived based on the associated SDKs.
  * <p>
- * Instances of this interface are used to configure tasks with input values (properties) that are resolved from an
- * {@link SDKReference}.
+ * Instances of this interface are used to configure tasks with input values (properties) that are resolved from the
+ * {@link SDKReference SDKReferences} in the caller context.
  * <p>
  * Clients may implement this interface. When doing so, make sure to adhere to the {@link #hashCode()} and
  * {@link #equals(Object)} contract. Implementers are also recommended to implement {@link Externalizable}.
  * <p>
  * Use {@link #create} to create a new instance.
  */
-public interface SDKPropertyReference {
+public interface SDKPropertyReference extends SDKValueReference<String> {
 	/**
 	 * Gets the SDK name for which this property reference is associated with.
 	 * 
+	 * @deprecated Call {@link #getValue(Map)} directly instead. (Since saker.sdk.support 0.8.3)
 	 * @return The SDK name.
 	 * @see SDKSupportUtils#getSDKNameComparator()
 	 */
+	@Deprecated
 	public String getSDKName();
 
 	/**
@@ -51,13 +56,26 @@ public interface SDKPropertyReference {
 	 * If the property cannot be retrieved from the SDK, then the method may return <code>null</code> or throw an
 	 * exception.
 	 * 
+	 * @deprecated Call {@link #getValue(Map)} directly instead. (Since saker.sdk.support 0.8.3)
 	 * @param sdk
 	 *            The SDK.
 	 * @return The resolved property or <code>null</code> if the resolution failed.
 	 * @throws Exception
 	 *             If the operation failed.
 	 */
+	@Deprecated
 	public String getProperty(SDKReference sdk) throws Exception;
+
+	@Override
+	public default String getValue(Map<String, ? extends SDKReference> sdks) throws NullPointerException, Exception {
+		String sdkname = getSDKName();
+		Objects.requireNonNull(sdkname, "sdk name");
+		SDKReference sdk = ObjectUtils.getMapValue(sdks, sdkname);
+		if (sdk == null) {
+			throw new SDKNotFoundException(sdkname);
+		}
+		return this.getProperty(sdk);
+	}
 
 	@Override
 	public int hashCode();

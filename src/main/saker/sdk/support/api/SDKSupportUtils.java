@@ -112,20 +112,10 @@ public class SDKSupportUtils {
 			Map<String, ? extends SDKReference> sdks)
 			throws NullPointerException, SDKNotFoundException, SDKPathNotFoundException {
 		Objects.requireNonNull(sdkpathref, "sdk path reference");
-		String sdkname = sdkpathref.getSDKName();
-		Objects.requireNonNull(sdkname, "sdk name");
-		SDKReference sdkref = ObjectUtils.getMapValue(sdks, sdkname);
-		if (sdkref == null) {
-			throw new SDKNotFoundException("SDK not found for name: " + sdkname);
-		}
 		try {
-			SakerPath path = sdkpathref.getPath(sdkref);
-			if (path == null) {
-				throw new SDKPathNotFoundException("No SDK path found for: " + sdkpathref + " in " + sdkref);
-			}
-			return path;
+			return sdkpathref.getValue(sdks);
 		} catch (Exception e) {
-			throw new SDKPathNotFoundException("No SDK path found for: " + sdkpathref + " in " + sdkref, e);
+			throw new SDKPathNotFoundException("No SDK path found for: " + sdkpathref, e);
 		}
 	}
 
@@ -156,21 +146,22 @@ public class SDKSupportUtils {
 			Map<String, ? extends SDKReference> sdks)
 			throws NullPointerException, SDKNotFoundException, SDKPropertyNotFoundException {
 		Objects.requireNonNull(sdkpropertyref, "sdk property reference");
-		String sdkname = sdkpropertyref.getSDKName();
-		Objects.requireNonNull(sdkname, "sdk name");
-		SDKReference sdkref = ObjectUtils.getMapValue(sdks, sdkname);
-		if (sdkref == null) {
-			throw new SDKNotFoundException("SDK not found for name: " + sdkname);
-		}
 		try {
-			String property = sdkpropertyref.getProperty(sdkref);
-			if (property == null) {
-				throw new SDKPropertyNotFoundException(
-						"No SDK property found for: " + sdkpropertyref + " in " + sdkref);
-			}
-			return property;
+			return sdkpropertyref.getValue(sdks);
 		} catch (Exception e) {
-			throw new SDKPropertyNotFoundException("No SDK property found for: " + sdkpropertyref + " in " + sdkref, e);
+			throw new SDKPathNotFoundException("No SDK property found for: " + sdkpropertyref, e);
+		}
+	}
+
+	//since saker.sdk.support 0.8.3
+	public static <T> T getSDKPropertyReferenceProperty(SDKValueReference<T> inforef,
+			Map<String, ? extends SDKReference> sdks)
+			throws NullPointerException, SDKNotFoundException, SDKPropertyNotFoundException {
+		Objects.requireNonNull(inforef, "sdk information reference");
+		try {
+			return inforef.getValue(sdks);
+		} catch (Exception e) {
+			throw new SDKPathNotFoundException("SDK information not found found for: " + inforef, e);
 		}
 	}
 
