@@ -27,14 +27,14 @@ public class SDKPathNotFoundException extends SDKValueNotFoundException {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException()
+	 * @see SDKValueNotFoundException#SDKValueNotFoundException()
 	 */
 	public SDKPathNotFoundException() {
 		super();
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String, Throwable, boolean, boolean)
+	 * @see SDKValueNotFoundException#SDKValueNotFoundException(String, Throwable, boolean, boolean)
 	 */
 	protected SDKPathNotFoundException(String message, Throwable cause, boolean enableSuppression,
 			boolean writableStackTrace) {
@@ -42,21 +42,21 @@ public class SDKPathNotFoundException extends SDKValueNotFoundException {
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String, Throwable)
+	 * @see SDKValueNotFoundException#SDKValueNotFoundException(String, Throwable)
 	 */
 	public SDKPathNotFoundException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String)
+	 * @see SDKValueNotFoundException#SDKValueNotFoundException(String)
 	 */
 	public SDKPathNotFoundException(String message) {
 		super(message);
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(Throwable)
+	 * @see SDKValueNotFoundException#SDKValueNotFoundException(Throwable)
 	 */
 	public SDKPathNotFoundException(Throwable cause) {
 		super(cause);

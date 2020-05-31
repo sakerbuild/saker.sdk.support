@@ -500,6 +500,30 @@ public class SDKSupportUtils {
 		return resolver.result;
 	}
 
+	/**
+	 * Retrieves an SDK from the argument SDK map or throws an exception if not found.
+	 * 
+	 * @param sdks
+	 *            The SDKs. The map should be ordered by the rules of {@link #getSDKNameComparator()}.
+	 * @param name
+	 *            The name to get the SDK for.
+	 * @return The SDK found for the given name.
+	 * @throws SDKNotFoundException
+	 *             If the SDK was not present in the argument map.
+	 * @throws NullPointerException
+	 *             If the name argument is <code>null</code>.
+	 * @since saker.sdk.support 0.8.3
+	 */
+	public static SDKReference requireSDK(Map<String, ? extends SDKReference> sdks, String name)
+			throws SDKNotFoundException, NullPointerException {
+		Objects.requireNonNull(name, "name");
+		SDKReference sdk = ObjectUtils.getMapValue(sdks, name);
+		if (sdk == null) {
+			throw new SDKNotFoundException(name);
+		}
+		return sdk;
+	}
+
 	private static SDKReference getResolvedSDKReference(SDKDescription description,
 			EnvironmentSelectionResult selectionresult) {
 		SDKReference[] result = { null };

@@ -27,14 +27,14 @@ public class SDKPropertyNotFoundException extends SDKValueNotFoundException {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException()
+	 * @see SDKValueNotFoundException#SDKValueNotFoundException()
 	 */
 	public SDKPropertyNotFoundException() {
 		super();
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String, Throwable, boolean, boolean)
+	 * @see SDKValueNotFoundException#SDKValueNotFoundException(String, Throwable, boolean, boolean)
 	 */
 	protected SDKPropertyNotFoundException(String message, Throwable cause, boolean enableSuppression,
 			boolean writableStackTrace) {
@@ -42,21 +42,21 @@ public class SDKPropertyNotFoundException extends SDKValueNotFoundException {
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String, Throwable)
+	 * @see SDKValueNotFoundException#SDKValueNotFoundException(String, Throwable)
 	 */
 	public SDKPropertyNotFoundException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(String)
+	 * @see SDKValueNotFoundException#SDKValueNotFoundException(String)
 	 */
 	public SDKPropertyNotFoundException(String message) {
 		super(message);
 	}
 
 	/**
-	 * @see SDKValueNotFoundException#SDKInformationNotFoundException(Throwable)
+	 * @see SDKValueNotFoundException#SDKValueNotFoundException(Throwable)
 	 */
 	public SDKPropertyNotFoundException(Throwable cause) {
 		super(cause);
