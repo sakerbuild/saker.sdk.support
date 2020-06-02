@@ -37,6 +37,12 @@ public class TaskDocs {
 	public static class DocSdkIdentifierOption {
 	}
 
+	@NestTypeInformation(kind = TypeInformationKind.LITERAL, qualifiedName = "FormatString")
+	@NestInformation("Format string that specifies how the output should be presented.\n"
+			+ "See the Java Formatter class for the syntax.")
+	public static class DocFormatString {
+	}
+
 	@NestInformation("Reference to path in a given SDK.\n"
 			+ "Represents a path in a SDK that is dynamically resolved based on the SDK context of where "
 			+ "the object is applied. Using this only makes sense in a context where there are SDK definitions, "

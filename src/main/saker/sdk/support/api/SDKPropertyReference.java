@@ -16,11 +16,15 @@
 package saker.sdk.support.api;
 
 import java.io.Externalizable;
+import java.util.Formatter;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import saker.build.thirdparty.saker.util.ImmutableUtils;
 import saker.build.thirdparty.saker.util.ObjectUtils;
 import saker.sdk.support.api.exc.SDKNotFoundException;
+import saker.sdk.support.impl.FormattedSDKPropertyReference;
 import saker.sdk.support.impl.SimpleSDKPropertyReference;
 
 /**
@@ -100,5 +104,28 @@ public interface SDKPropertyReference extends SDKValueReference<String> {
 		Objects.requireNonNull(sdkname, "sdk name");
 		Objects.requireNonNull(propertyidentifier, "sdk property identifier");
 		return new SimpleSDKPropertyReference(sdkname, propertyidentifier);
+	}
+
+	/**
+	 * Creates a new {@link SDKPropertyReference} that derives the property value using the given format and associated
+	 * arguments.
+	 * <p>
+	 * Each argument {@link SDKValueReference} will be evaluated in the caller SDK context and the results are formatted
+	 * with the given {@linkplain Formatter format string}.
+	 * 
+	 * @param format
+	 *            The format string.
+	 * @param arguments
+	 *            The arguments.
+	 * @return The cretaed property reference.
+	 * @throws NullPointerException
+	 *             If any of the arguments are <code>null</code>.
+	 * @since saker.sdk.support 0.8.3
+	 */
+	public static SDKPropertyReference createWithFormat(String format, List<? extends SDKValueReference<?>> arguments)
+			throws NullPointerException {
+		Objects.requireNonNull(format, "format");
+		Objects.requireNonNull(arguments, "arguments");
+		return new FormattedSDKPropertyReference(format, ImmutableUtils.makeImmutableList(arguments));
 	}
 }
