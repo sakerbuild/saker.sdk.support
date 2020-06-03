@@ -68,7 +68,11 @@ import saker.sdk.support.main.TaskDocs.DocSdkNameOption;
 		type = @NestTypeUsage(DocFormatString.class),
 		info = @NestInformation("The format of how the property value should be computed.\n"
 				+ "The input for the formatter is the value of the Arguments parameter. If it is not specified, "
-				+ "then the single argument will be passed to it based on Name and Identifier."))
+				+ "then the single argument will be passed to it based on Name and Identifier.\n"
+				+ "It is recommended to use the %s format placeholder for the arguments. Non-string inputs "
+				+ "are automatically handled by the formatter.\n"
+				+ "A simple example for passing a formatted value with some version information:\n"
+				+ "sdk.property(Format: \"-version=%s\", Name: MySdk, Identifier: sdk.version)"))
 @NestParameterInformation(value = "Arguments",
 		type = @NestTypeUsage(value = List.class,
 				elementTypes = SDKPropertyTaskFactory.SDKPropertyFormatArgumentTaskOption.class),

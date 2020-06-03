@@ -1,3 +1,4 @@
 sdk.path=saker.sdk.support.main.path.SDKPathTaskFactory
 sdk.property=saker.sdk.support.main.property.SDKPropertyTaskFactory
+sdk.resolve=saker.sdk.support.main.resolve.ResolveSDKTaskFactory
 sdk.user=saker.sdk.support.main.user.UserSDKTaskFactory

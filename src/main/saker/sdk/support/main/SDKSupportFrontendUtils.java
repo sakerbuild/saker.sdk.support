@@ -17,6 +17,10 @@ public class SDKSupportFrontendUtils {
 	}
 
 	/**
+	 * Converts the input SDK description task options to SDK descriptions.
+	 * <p>
+	 * <code>null</code> input values are preserved. Exception is thrown in case of conflict.
+	 * 
 	 * @param sdksoption
 	 *            The SDK options.
 	 * @return A modifiable map.
@@ -28,29 +32,30 @@ public class SDKSupportFrontendUtils {
 		if (ObjectUtils.isNullOrEmpty(sdksoption)) {
 			return sdkdescriptions;
 		}
-		Map<String, SDKDescriptionTaskOption> sdkoptions = new TreeMap<>(SDKSupportUtils.getSDKNameComparator());
-		if (!ObjectUtils.isNullOrEmpty(sdksoption)) {
-			for (Entry<String, SDKDescriptionTaskOption> entry : sdksoption.entrySet()) {
-				SDKDescriptionTaskOption sdktaskopt = entry.getValue();
-				if (sdktaskopt == null) {
-					continue;
-				}
-				SDKDescriptionTaskOption prev = sdkoptions.putIfAbsent(entry.getKey(), sdktaskopt.clone());
-				if (prev != null) {
-					throw new SDKNameConflictException("SDK with name " + entry.getKey() + " defined multiple times.");
-				}
+		Map<String, SDKDescriptionTaskOption> sdktaskoptions = new TreeMap<>(SDKSupportUtils.getSDKNameComparator());
+		for (Entry<String, SDKDescriptionTaskOption> entry : sdksoption.entrySet()) {
+			SDKDescriptionTaskOption sdktaskopt = entry.getValue();
+			SDKDescriptionTaskOption cloned = sdktaskopt == null ? null : sdktaskopt.clone();
+			SDKDescriptionTaskOption prev = sdktaskoptions.putIfAbsent(entry.getKey(), cloned);
+			if (prev != null) {
+				throw new SDKNameConflictException("SDK with name " + entry.getKey() + " defined multiple times. (With "
+						+ prev + " and " + cloned + ")");
 			}
 		}
-		for (Entry<String, SDKDescriptionTaskOption> entry : sdkoptions.entrySet()) {
+
+		SDKDescription[] desc = { null };
+		SDKDescriptionTaskOption.Visitor visitor = new SDKDescriptionTaskOption.Visitor() {
+			@Override
+			public void visit(SDKDescription description) {
+				desc[0] = description;
+			}
+		};
+
+		for (Entry<String, SDKDescriptionTaskOption> entry : sdktaskoptions.entrySet()) {
 			SDKDescriptionTaskOption val = entry.getValue();
-			SDKDescription[] desc = { null };
+			desc[0] = null;
 			if (val != null) {
-				val.accept(new SDKDescriptionTaskOption.Visitor() {
-					@Override
-					public void visit(SDKDescription description) {
-						desc[0] = description;
-					}
-				});
+				val.accept(visitor);
 			}
 			sdkdescriptions.putIfAbsent(entry.getKey(), desc[0]);
 		}

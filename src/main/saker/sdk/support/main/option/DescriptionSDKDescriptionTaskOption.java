@@ -36,4 +36,11 @@ class DescriptionSDKDescriptionTaskOption implements SDKDescriptionTaskOption {
 	public void accept(Visitor visitor) {
 		visitor.visit(sdkDescription);
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "[" + (sdkDescription != null ? "sdkDescription=" + sdkDescription : "")
+				+ "]";
+	}
+
 }
