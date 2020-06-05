@@ -11,6 +11,11 @@ import saker.sdk.support.api.SDKSupportUtils;
 import saker.sdk.support.api.exc.SDKNameConflictException;
 import saker.sdk.support.main.option.SDKDescriptionTaskOption;
 
+/**
+ * Frontend build task utilities for dealing with SDKs.
+ * 
+ * @since saker.sdk.support 0.8.3
+ */
 public class SDKSupportFrontendUtils {
 	private SDKSupportFrontendUtils() {
 		throw new UnsupportedOperationException();

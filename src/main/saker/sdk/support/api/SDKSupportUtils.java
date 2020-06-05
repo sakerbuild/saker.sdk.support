@@ -189,49 +189,12 @@ public class SDKSupportUtils {
 	public static TaskExecutionEnvironmentSelector getSDKBasedClusterExecutionEnvironmentSelector(
 			Collection<? extends SDKDescription> sdkdescriptions) throws NullPointerException {
 		Objects.requireNonNull(sdkdescriptions, "sdk descriptions");
-		boolean[] clusterable = { true };
+		ClusterableCheckingSDKDescriptionVisitor visitor = new ClusterableCheckingSDKDescriptionVisitor();
+
 		for (SDKDescription desc : sdkdescriptions) {
 			Objects.requireNonNull(desc, "sdk description");
-			desc.accept(new SDKDescriptionVisitor() {
-				@Override
-				public void visit(EnvironmentSDKDescription description) {
-					//stay clusterable as true
-				}
-
-				@Override
-				public void visit(ResolvedSDKDescription description) {
-					clusterable[0] = false;
-				}
-
-				@Override
-				public void visit(IndeterminateSDKDescription description) {
-					SDKDescription basesdk = description.getBaseSDKDescription();
-					Objects.requireNonNull(basesdk, "base sdk description");
-					basesdk.accept(this);
-				}
-
-				@Override
-				public void visit(UserSDKDescription description) {
-					EnvironmentQualifier qualifier = description.getQualifier();
-					if (qualifier == null) {
-						//only the local should be used
-						clusterable[0] = false;
-						return;
-					}
-					qualifier.accept(new EnvironmentQualifierVisitor() {
-						@Override
-						public void visit(PropertyEnvironmentQualifier qualifier) {
-							//stay clusterable as true 
-						}
-
-						@Override
-						public void visit(AnyEnvironmentQualifier qualifier) {
-							//stay clusterable as true 
-						}
-					});
-				}
-			});
-			if (!clusterable[0]) {
+			desc.accept(visitor);
+			if (!visitor.clusterable) {
 				return null;
 			}
 		}
@@ -290,12 +253,26 @@ public class SDKSupportUtils {
 		TreeMap<String, SDKDescription> ndescriptions = new TreeMap<>(sdkdescriptions);
 		for (Entry<String, SDKDescription> entry : ndescriptions.entrySet()) {
 			SDKDescription desc = entry.getValue();
-			if (desc instanceof IndeterminateSDKDescription) {
-				IndeterminateSDKDescription indeterminate = (IndeterminateSDKDescription) desc;
-				SDKReference actualreference = getResolvedSDKReference(desc, envselectionresult);
-				SDKDescription pinneddescription = indeterminate.pinSDKDescription(actualreference);
-				entry.setValue(pinneddescription);
-			}
+			desc.accept(new SDKDescriptionVisitor() {
+				@Override
+				public void visit(EnvironmentSDKDescription description) {
+				}
+
+				@Override
+				public void visit(ResolvedSDKDescription description) {
+				}
+
+				@Override
+				public void visit(UserSDKDescription description) {
+				}
+
+				@Override
+				public void visit(IndeterminateSDKDescription indeterminate) {
+					SDKReference actualreference = getResolvedSDKReference(desc, envselectionresult);
+					SDKDescription pinneddescription = indeterminate.pinSDKDescription(actualreference);
+					entry.setValue(pinneddescription);
+				}
+			});
 		}
 		return ndescriptions;
 	}
@@ -326,15 +303,30 @@ public class SDKSupportUtils {
 		TreeMap<String, SDKDescription> ndescriptions = new TreeMap<>(sdkdescriptions);
 		for (Entry<String, SDKDescription> entry : ndescriptions.entrySet()) {
 			SDKDescription desc = entry.getValue();
-			if (desc instanceof IndeterminateSDKDescription) {
-				IndeterminateSDKDescription indeterminate = (IndeterminateSDKDescription) desc;
-				SDKReference actualreference = sdkreferences.get(entry.getKey());
-				if (actualreference == null) {
-					throw new SDKNotFoundException("Resolved SDK reference not found for name: " + entry.getKey());
+			desc.accept(new SDKDescriptionVisitor() {
+				@Override
+				public void visit(EnvironmentSDKDescription description) {
 				}
-				SDKDescription pinneddescription = indeterminate.pinSDKDescription(actualreference);
-				entry.setValue(pinneddescription);
-			}
+
+				@Override
+				public void visit(ResolvedSDKDescription description) {
+				}
+
+				@Override
+				public void visit(UserSDKDescription description) {
+				}
+
+				@Override
+				public void visit(IndeterminateSDKDescription indeterminate) {
+					SDKReference actualreference = sdkreferences.get(entry.getKey());
+					if (actualreference == null) {
+						throw new SDKNotFoundException("Resolved SDK reference not found for name: " + entry.getKey());
+					}
+					SDKDescription pinneddescription = indeterminate.pinSDKDescription(actualreference);
+					entry.setValue(pinneddescription);
+				}
+
+			});
 		}
 		return ndescriptions;
 	}
@@ -541,6 +533,58 @@ public class SDKSupportUtils {
 			}
 		});
 		return result[0];
+	}
+
+	private static final class ClusterableCheckingSDKDescriptionVisitor implements SDKDescriptionVisitor {
+		protected boolean clusterable = true;
+
+		private ClusterableCheckingSDKDescriptionVisitor() {
+		}
+
+		@Override
+		public void visit(EnvironmentSDKDescription description) {
+			//stay clusterable as true
+		}
+
+		@Override
+		public void visit(ResolvedSDKDescription description) {
+			clusterable = false;
+		}
+
+		@Override
+		public void visit(IndeterminateSDKDescription description) {
+			SDKDescription basesdk = description.getBaseSDKDescription();
+			Objects.requireNonNull(basesdk, "base sdk description");
+			basesdk.accept(this);
+		}
+
+		@Override
+		public void visit(UserSDKDescription description) {
+			EnvironmentQualifier qualifier = description.getQualifier();
+			if (qualifier == null) {
+				//only the local should be used
+				clusterable = false;
+				return;
+			}
+			//the following call examines the environment qualifier
+			//and checks if it enables cluster dispatching
+			// ---- currently this is a no-op visitor as all types enabled remote execution ----
+			qualifier.accept(NoopEnvironmentQualifierVisitor.INSTANCE);
+		}
+	}
+
+	private static final class NoopEnvironmentQualifierVisitor implements EnvironmentQualifierVisitor {
+		public static final NoopEnvironmentQualifierVisitor INSTANCE = new NoopEnvironmentQualifierVisitor();
+
+		@Override
+		public void visit(PropertyEnvironmentQualifier qualifier) {
+			//stay clusterable as true 
+		}
+
+		@Override
+		public void visit(AnyEnvironmentQualifier qualifier) {
+			//stay clusterable as true 
+		}
 	}
 
 	private static abstract class AbstractSDKReferenceResolverDescriptionVisitor implements SDKDescriptionVisitor {
