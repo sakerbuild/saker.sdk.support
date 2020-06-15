@@ -20,11 +20,11 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-import saker.sdk.support.api.ResolvedSDKDescription;
 import saker.sdk.support.api.SDKDescriptionVisitor;
 import saker.sdk.support.api.SDKReference;
 
-public class SimpleResolvedSDKDescription implements ResolvedSDKDescription, Externalizable {
+@SuppressWarnings("deprecation")
+public class SimpleResolvedSDKDescription implements saker.sdk.support.api.ResolvedSDKDescription, Externalizable {
 	private static final long serialVersionUID = 1L;
 
 	private SDKReference sdkReference;

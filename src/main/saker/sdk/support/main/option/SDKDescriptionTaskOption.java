@@ -16,7 +16,6 @@
 package saker.sdk.support.main.option;
 
 import saker.nest.scriptinfo.reflection.annot.NestInformation;
-import saker.sdk.support.api.ResolvedSDKDescription;
 import saker.sdk.support.api.SDKDescription;
 import saker.sdk.support.api.SDKReference;
 
@@ -30,8 +29,9 @@ public interface SDKDescriptionTaskOption {
 		return new DescriptionSDKDescriptionTaskOption(description);
 	}
 
+	@SuppressWarnings("deprecation")
 	public static SDKDescriptionTaskOption valueOf(SDKReference sdkref) {
-		return new DescriptionSDKDescriptionTaskOption(ResolvedSDKDescription.create(sdkref));
+		return new DescriptionSDKDescriptionTaskOption(saker.sdk.support.api.ResolvedSDKDescription.create(sdkref));
 	}
 
 	public interface Visitor {

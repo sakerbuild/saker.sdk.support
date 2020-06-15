@@ -31,7 +31,10 @@ import saker.sdk.support.impl.SimpleResolvedSDKDescription;
  * Clients shouldn't implement this interface.
  * <p>
  * Use {@link #create(SDKReference)} to create a new instance.
+ * 
+ * @deprecated This kind of SDK description shouldn't be used anymore.
  */
+@Deprecated
 public interface ResolvedSDKDescription extends SDKDescription {
 	/**
 	 * Gets the enclosed SDK reference.

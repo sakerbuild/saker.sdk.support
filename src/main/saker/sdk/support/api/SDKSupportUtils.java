@@ -258,6 +258,7 @@ public class SDKSupportUtils {
 				public void visit(EnvironmentSDKDescription description) {
 				}
 
+				@SuppressWarnings("deprecation")
 				@Override
 				public void visit(ResolvedSDKDescription description) {
 				}
@@ -308,6 +309,7 @@ public class SDKSupportUtils {
 				public void visit(EnvironmentSDKDescription description) {
 				}
 
+				@SuppressWarnings("deprecation")
 				@Override
 				public void visit(ResolvedSDKDescription description) {
 				}
@@ -546,6 +548,7 @@ public class SDKSupportUtils {
 			//stay clusterable as true
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void visit(ResolvedSDKDescription description) {
 			clusterable = false;
@@ -593,6 +596,7 @@ public class SDKSupportUtils {
 		public AbstractSDKReferenceResolverDescriptionVisitor() {
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void visit(ResolvedSDKDescription description) {
 			result = description.getSDKReference();

@@ -43,9 +43,12 @@ public interface SDKDescriptionVisitor {
 	/**
 	 * Visits a {@linkplain ResolvedSDKDescription resolved SDK description}.
 	 * 
+	 * @deprecated Resolved SDK descriptions are strongly discouraged, clients aren't expected to support these kind of
+	 *                 SDK descriptions.
 	 * @param description
 	 *            The SDK description.
 	 */
+	@Deprecated
 	public default void visit(ResolvedSDKDescription description) {
 		throw new UnsupportedOperationException("Unsupported SDK description: " + description);
 	}
