@@ -202,7 +202,8 @@ public class SDKSupportUtils {
 	}
 
 	/**
-	 * Pins the SDK descriptions of the resolved {@link IndeterminateSDKDescription indeterminate SDK descriptions}.
+	 * Pins the SDK descriptions of the resolved {@linkplain IndeterminateSDKDescription indeterminate SDK
+	 * descriptions}.
 	 * <p>
 	 * The method will take the argument environment selection result and pin the SDK descriptions of the
 	 * {@link IndeterminateSDKDescription IndeterminateSDKDescriptions} that are present.
@@ -279,7 +280,8 @@ public class SDKSupportUtils {
 	}
 
 	/**
-	 * Pins the SDK descriptions of the resolved {@link IndeterminateSDKDescription indeterminate SDK descriptions}.
+	 * Pins the SDK descriptions of the resolved {@linkplain IndeterminateSDKDescription indeterminate SDK
+	 * descriptions}.
 	 * <p>
 	 * This method works the same way as {@link #pinSDKSelection(EnvironmentSelectionResult, NavigableMap)}, but
 	 * retrieves the resolved SDK references from the given argument rather than an environment selection result.
